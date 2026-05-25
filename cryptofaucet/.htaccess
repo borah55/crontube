@@ -1,0 +1,53 @@
+# =========================================================
+# Crypto Faucet Platform - root .htaccess
+# Drop the cryptofaucet/ directory anywhere under public_html.
+# =========================================================
+
+# --- Security headers -------------------------------------
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    Header set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    Header set X-XSS-Protection "1; mode=block"
+    Header unset X-Powered-By
+</IfModule>
+
+# --- Disable directory listing ----------------------------
+Options -Indexes -MultiViews
+
+# --- Disable server signature -----------------------------
+ServerSignature Off
+
+# --- Block access to dotfiles -----------------------------
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# --- Block access to sensitive files ----------------------
+<FilesMatch "(^\.|composer\.(json|lock)|package\.json|\.md|\.sql|\.log|\.example|\.example\.php)$">
+    Require all denied
+</FilesMatch>
+
+# --- Pretty URL routing -----------------------------------
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # If the project is in a subdirectory, set RewriteBase to that path.
+    # e.g. RewriteBase /cryptofaucet/
+    # RewriteBase /
+
+    # Redirect direct /install requests through index.php only when not actual files
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php?_url=/$1 [QSA,L]
+</IfModule>
+
+# --- PHP hardening (only if AllowOverride permits) --------
+<IfModule mod_php.c>
+    php_flag display_errors Off
+    php_flag expose_php Off
+    php_value session.cookie_httponly 1
+    php_value session.cookie_secure 1
+    php_value session.use_strict_mode 1
+</IfModule>

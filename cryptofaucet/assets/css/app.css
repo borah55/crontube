@@ -1,0 +1,31 @@
+/* Lightweight extras on top of Tailwind CDN.
+   Tailwind handles 95% of the look; we only need a handful of utilities
+   for animations and component polish. */
+
+@keyframes pulse-ring {
+    0%   { box-shadow: 0 0 0 0 rgba(99, 102, 241, .55); }
+    70%  { box-shadow: 0 0 0 18px rgba(99, 102, 241, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+}
+.cf-claim-btn { animation: pulse-ring 2.5s infinite; }
+
+@keyframes pop-in {
+    0%   { transform: scale(.6); opacity: 0; }
+    100% { transform: scale(1);   opacity: 1; }
+}
+.cf-pop { animation: pop-in .25s ease-out; }
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+}
+.cf-shake { animation: shake .4s ease; }
+
+/* Live-glow indicator for "online users" pill. */
+.cf-live::before {
+    content: ''; display: inline-block; width: 8px; height: 8px;
+    border-radius: 9999px; background: #10b981; margin-right: .5rem;
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, .6);
+    animation: pulse-ring 2s infinite;
+}
