@@ -20,6 +20,12 @@ $step   = (int)($_GET['step'] ?? 1);
 $errors = [];
 $ok     = [];
 
+// Base-path detection so success links work in subdirectory installs.
+$basePath = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/install.php'));
+$basePath = rtrim($basePath, '/');
+if ($basePath === '' || $basePath === '/') $basePath = '';
+$loginUrl = $basePath . '/login';
+
 // If config exists already, lock the installer unless ?force=1.
 if (file_exists($configFile) && !isset($_GET['force'])) {
     $errors[] = 'config/config.php already exists. Delete it first if you want to re-install, or pass ?force=1.';
@@ -211,12 +217,12 @@ if ($step === 3 && empty($_SESSION['install_done'])) {
     <?php elseif ($step === 3): ?>
         <h2 class="text-2xl font-semibold text-emerald-700 mb-4">Installation complete</h2>
         <ol class="list-decimal pl-5 space-y-2 text-slate-700 mb-6">
-            <li>Sign in at <a href="/login" class="text-indigo-600 underline">/login</a> with the admin credentials.</li>
+            <li>Sign in at <a href="<?= h($loginUrl) ?>" class="text-indigo-600 underline"><?= h($loginUrl) ?></a> with the admin credentials.</li>
             <li><strong class="text-red-700">Delete <code>install.php</code> from the server.</strong></li>
-            <li>Configure FaucetPay API key, reCAPTCHA, SMTP, and coins in <code>/admin/settings</code>.</li>
+            <li>Configure FaucetPay API key, reCAPTCHA, SMTP, and coins in <code><?= h($basePath) ?>/admin/settings</code>.</li>
             <li>Set up the cron job (see INSTALL.md) to run <code>cron.php</code> every 5 minutes.</li>
         </ol>
-        <a href="/login" class="inline-block bg-indigo-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-indigo-700">Go to login</a>
+        <a href="<?= h($loginUrl) ?>" class="inline-block bg-indigo-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-indigo-700">Go to login</a>
 
     <?php else: ?>
         <p class="text-slate-700">Installer locked. Resolve the error above to continue.</p>

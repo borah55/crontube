@@ -47,7 +47,23 @@ final class Database
     public function run(string $sql, array $params = []): PDOStatement
     {
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute($params);
+
+        // Bind by detected PHP type. With ATTR_EMULATE_PREPARES=false MySQL needs
+        // INTERVAL ? MINUTE / LIMIT ? OFFSET ? params bound as integers, otherwise
+        // it fails with a syntax error in strict mode.  $stmt->execute($array)
+        // would bind everything as PARAM_STR which breaks those queries.
+        $isList = array_is_list($params);
+        foreach ($params as $key => $value) {
+            $type = match (true) {
+                is_int($value)  => PDO::PARAM_INT,
+                is_bool($value) => PDO::PARAM_BOOL,
+                is_null($value) => PDO::PARAM_NULL,
+                default         => PDO::PARAM_STR,
+            };
+            $placeholder = $isList ? ($key + 1) : (':' . ltrim((string)$key, ':'));
+            $stmt->bindValue($placeholder, $value, $type);
+        }
+        $stmt->execute();
         return $stmt;
     }
 

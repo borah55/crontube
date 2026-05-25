@@ -39,6 +39,19 @@ final class Router
         $url    = $_GET['_url'] ?? ($_SERVER['REQUEST_URI'] ?? '/');
         $url    = '/' . trim(parse_url($url, PHP_URL_PATH) ?: '/', '/');
 
+        // Strip the install subdirectory so routes can be defined without it.
+        $base = rtrim(Application::$basePath, '/');
+        if ($base !== '') {
+            if (str_starts_with($url, $base . '/')) {
+                $url = substr($url, strlen($base));
+            } elseif ($url === $base) {
+                $url = '/';
+            }
+            if ($url === '') {
+                $url = '/';
+            }
+        }
+
         foreach ($this->routes as [$rmethod, $pattern, $handler, $middleware]) {
             if ($rmethod !== $method) continue;
             $regex = $this->compile($pattern);

@@ -62,6 +62,14 @@ final class Middleware
 
     private static function redirect(string $path): void
     {
+        $base = rtrim(Application::$basePath, '/');
+        if ($base !== ''
+            && str_starts_with($path, '/')
+            && !str_starts_with($path, '//')
+            && !str_starts_with($path, $base . '/')
+            && $path !== $base) {
+            $path = $base . $path;
+        }
         header('Location: ' . $path);
     }
 }

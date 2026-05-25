@@ -29,6 +29,25 @@
         return meta ? meta.getAttribute('content') : '';
     };
 
+    // ---- Base path helper -------------------------------------------
+    // When the site is installed in a subdirectory (e.g. /cryptofaucet),
+    // every absolute path needs to be prefixed.  Layout templates emit
+    // <meta name="base-path" content="/cryptofaucet"> for this purpose.
+    CF.base = function () {
+        if (CF._base !== undefined) return CF._base;
+        var meta = document.querySelector('meta[name="base-path"]');
+        CF._base = meta ? (meta.getAttribute('content') || '') : '';
+        return CF._base;
+    };
+    CF.url = function (path) {
+        if (typeof path !== 'string' || !path.length) return path;
+        if (path.charAt(0) !== '/' || path.indexOf('//') === 0) return path;
+        var base = CF.base();
+        if (!base) return path;
+        if (path === base || path.indexOf(base + '/') === 0) return path;
+        return base + path;
+    };
+
     CF.post = function (url, data) {
         var fd;
         if (data instanceof FormData) fd = data;
@@ -37,7 +56,7 @@
             Object.keys(data || {}).forEach(function (k) { fd.append(k, data[k]); });
         }
         if (!fd.has('_csrf')) fd.append('_csrf', CF.csrf());
-        return fetch(url, {
+        return fetch(CF.url(url), {
             method: 'POST',
             body: fd,
             credentials: 'same-origin',
@@ -145,7 +164,7 @@
             CF.post('/ptc/claim/' + adId, { token: token }).then(function (resp) {
                 if (resp.ok) {
                     CF.toast('+' + resp.amount + ' credited!', 'success');
-                    setTimeout(function () { location.href = '/ptc'; }, 1200);
+                    setTimeout(function () { location.href = CF.url('/ptc'); }, 1200);
                 } else {
                     CF.toast('Failed: ' + (resp.error || 'unknown'), 'error');
                 }

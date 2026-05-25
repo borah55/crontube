@@ -36,6 +36,17 @@ abstract class Controller
         if ($flash !== null) {
             Session::flash($type, $flash);
         }
+        // Prefix root-absolute URLs with the detected base path so subdirectory
+        // installs redirect to the right place.  External URLs (https://...,
+        // //host/...) and already-prefixed paths pass through unchanged.
+        $base = rtrim(Application::$basePath, '/');
+        if ($base !== ''
+            && str_starts_with($url, '/')
+            && !str_starts_with($url, '//')
+            && !str_starts_with($url, $base . '/')
+            && $url !== $base) {
+            $url = $base . $url;
+        }
         header('Location: ' . $url);
         exit;
     }

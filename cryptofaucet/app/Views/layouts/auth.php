@@ -10,6 +10,7 @@ $flashes  = $flash ?? [];
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="csrf-token" content="<?= Sec::e(Csrf::token()) ?>">
+<meta name="base-path" content="<?= Sec::e(\App\Core\Application::$basePath) ?>">
 <title><?= $siteName ?></title>
 <script>
 (function () { try {

@@ -31,14 +31,34 @@ final class Helpers
         return $out;
     }
 
+    /**
+     * Absolute URL using the configured site_url (good for emails,
+     * referral links, etc.).  Falls back to the request scheme/host if
+     * site_url isn't set.
+     */
     public static function url(string $path = ''): string
     {
         $base = (string)Setting::get('site_url', '');
+        if ($base === '') {
+            $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+            $host   = $_SERVER['HTTP_HOST'] ?? 'localhost';
+            $base   = $scheme . '://' . $host . Application::$basePath;
+        }
         return rtrim($base, '/') . '/' . ltrim($path, '/');
+    }
+
+    /**
+     * Same-host path that is correct whether the project lives at the document
+     * root or in a subdirectory.  Use this for in-page links/forms instead of
+     * raw '/login' style strings.
+     */
+    public static function path(string $path = ''): string
+    {
+        return rtrim(Application::$basePath, '/') . '/' . ltrim($path, '/');
     }
 
     public static function asset(string $path): string
     {
-        return '/assets/' . ltrim($path, '/');
+        return self::path('assets/' . ltrim($path, '/'));
     }
 }

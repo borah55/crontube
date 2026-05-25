@@ -58,6 +58,10 @@ final class AdminController extends Controller
         if (!$this->auth->isAdmin()) {
             $this->abort(403, 'Forbidden');
         }
+        // Disable the HTML-rewrite output buffer so the dump streams to disk
+        // instead of accumulating in memory.
+        while (ob_get_level() > 0) { ob_end_clean(); }
+
         $tables = $this->db->fetchAll('SHOW TABLES');
         $key    = array_key_first($tables[0] ?? []) ?? 'Tables_in_db';
         $name   = 'backup-' . date('Y-m-d-His') . '.sql';
